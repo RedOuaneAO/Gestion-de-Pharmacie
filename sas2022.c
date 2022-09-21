@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
-
-//struct section
+#include <string.h>
+//###############################################################  struct section  ###################################################################
 struct product{
 	char code[20];
 	char nom[20];
@@ -9,33 +9,40 @@ struct product{
 	int quantity;
 
 };
-//static variable
-static struct product prd[200];
-static int count=0;
-//fuction section
-void menu(){             //menu
-	int choix , prodNmb , choiceNum;
+//####################################################################  static variable  #############################################################
+
+
+static struct product prd[200];                 //where we stock product
+ int count=0;                              //how many product we added
+
+//#################################################################  fuction section  ################################################################
+
+ //------------------------------------------------------------------  Menu  -------------------------------------------------------------------------------
+ 
+void menu(){            
+	int choice , prodNmb , choiceNum;
 	printf("#################################################################\n");
 	printf("##                  pharmacy System Management                 ##\n");
 	printf("#################################################################\n\n");
 	printf("             choice one of the following options :\n\n");
-	printf("1: ajouter des produit         :\n");
-	printf("2: lister les produit          :\n");
-	printf("3:enregistrer des vent         :\n");
-	printf("4:rechercher les produit       :\n");
-	printf("5:Etat de stock                :\n");
-	printf("6:Alimenter le stock           :\n");
-	printf("7:supprimer les produit        :\n");
-	printf("8:Statistique de vente         :\n");
+	printf("                 __________________________________\n");
+	printf("                | 1: ajouter des produit         : |\n");
+	printf("                | 2: lister les produit          : |\n");
+	printf("                | 3:enregistrer des vent         : |\n");
+	printf("                | 4:rechercher les produit       : |\n");
+	printf("                | 5:Etat de stock                : |\n");
+	printf("                | 6:Alimenter le stock           : |\n");
+	printf("                | 7:supprimer les produit        : |\n");
+	printf("                | 8:Statistique de vente         : |\n");
 	printf("------------------------------------------------------------------\n");
 	printf("    saisir votre choix :\n");
-	scanf("%d",&choix);
-	switch(choix){
+	scanf("%d",&choice);
+	switch(choice){
 		case 1 :
  			// system("cls"); //to clear the terminal
 			printf("      choice  what you want\n");
 			printf("1: ajouter un produit.\n");
-			printf("2: ajouter plusieur produiut\n");
+			printf("2: ajouter plusieur produit\n");
 			scanf("%d",&choiceNum);
 			if(choiceNum==1){
 			  	ajoutProd(1);
@@ -44,6 +51,7 @@ void menu(){             //menu
 			scanf("%d",&prodNmb);
 			ajoutProd(prodNmb);
 			}
+			afficher();
 			menu();
 			break;
 		case 2:
@@ -56,81 +64,101 @@ void menu(){             //menu
 			}else if(choiceNum==2){
 			    listParNom();
 			}
-		
-
+			menu();
+			break;
+		case 3:
+			acheterPrd();
+			menu();
+        case 4:
+            	printf("      choice  what you want\n");
+			printf("1: search by code\n");
+			printf("2: search by quantity \n");
+			scanf("%d",&choiceNum);
+			if(choiceNum==1){
+			    SearchByCode();
+			}else if(choiceNum==2){
+			    SearchByQuantity();
+			}
+            menu();
+            break;
+        case 5:
+		    stockStatus();
+		    menu();
+		    break;
+		case 6:
+		stockSupply(); 
+		menu();
 	}
 }
-void listParPrix(){         //listing by price
-    int i, j, tmp;
-    struct product copy[count];
-    for(i=0;i<count;i++){
-        for(j= i + 1;j<count;j++){
-            if(prd[i].prix<prd[j].prix){
-                //NAME
-                strcpy(copy[i].nom,prd[i].nom);
-                strcpy(prd[i].nom,prd[j].nom);
-                strcpy(prd[j].nom,copy[i].nom);
-                //code
-                strcpy(copy[i].code,prd[i].code);
-                strcpy(prd[i].code,prd[j].code);
-                strcpy(prd[j].code,copy[i].code);
-            // QUANTITY
-                copy[i].quantity=prd[i].quantity;
-                prd[i].quantity=prd[j].quantity;
-                prd[j].quantity=copy[i].quantity;
-                
-                tmp=prd[i].prix;
-                prd[i].prix=prd[j].prix;
-                prd[j].prix=tmp;
-            
-            }
-        }
-    }
-    printf("-----------------------------------\n");
-    printf("Code       |  Name      |  Price      |    QuantitY\n");
-    for(i=0; i <count; i++){
+//------------------------------------------------------------------------afficher function-------------------------------------------------------------------
+
+
+void afficher(){
+	int i;
+		printf("-----------------------------------\n");
+    printf("Code          |  Name        |  Price        |     QuantitY\n");
+    for(i=0; i<count; i++){
     
     printf("      %s     |  %s        |   %.2f        | %d     \n",prd[i].code,prd[i].nom,prd[i].prix,prd[i].quantity);
     
     }
-    }
+}
 
-void listParNom(){
+
+//------------------------------------------------------------------listing by price----------------------------------------------------------------------------
+
+void listParPrix(){                                                      
     struct product copy[count];
+	int i, j;
+	for(i = 0; i < count; i++){
+		for(j = i+1; j < count; j++){
+			if(prd[i].prix < prd[j].prix){
+				copy[i]= prd[j];
+				prd[j] = prd[i];
+				prd[i] = copy[i];
+			}
+		}
+	}
+	printf("-----------------------------------\n");
+    printf("Code          |  Name        |  Price        |     QuantitY\n");
+    for(i=0; i<count; i++){
+    
+    printf("      %s     |  %s        |   %.2f        | %d     \n",prd[i].code,prd[i].nom,prd[i].prix,prd[i].quantity);
+    
+    }
+	
+}
+
+
+ // ------------------------------------------------------------------ listing by name :---------------------------------------------------------------------
+ 
+void listParNom(){                                                    
+   struct product copy[count];
     int i,j;
+    
     for(i=0;i<count;i++){
+    	
         for(j=i+1;j<count;j++){
-            if(strcmp(prd[i].nom,prd[j].nom)>0){
-                //NOM
-                strcpy(copy[i].nom,prd[i].nom);
-                strcpy(prd[i].nom,prd[j].nom);
-                strcpy(prd[j].nom,copy[i].nom);
-                 //code
-                strcpy(copy[i].code,prd[i].code);
-                strcpy(prd[i].code,prd[j].code);
-                strcpy(prd[j].code,copy[i].code);
-                // QUANTITY
-                copy[i].quantity=prd[i].quantity;
-                prd[i].quantity=prd[j].quantity;
-                prd[j].quantity=copy[i].quantity;
-                //PRICE
-                copy[i].prix=prd[i].prix;
-                prd[i].prix=prd[j].prix;
-                prd[j].prix=copy[i].prix;
+        if(strcmp(prd[i].nom,prd[j].nom)>0)
+			{
+              copy[i]=prd[i];
+              prd[i]=prd[j];
+              prd[j]=copy[i];
             }
-        }
-    }
-      printf("-----------------------------------\n");
+    	}
+	}
+	printf("-----------------------------------\n");
     printf("Code       |  Name      |  Price      |    QuantitY\n");
     for(i=0; i <count; i++){
-    
     printf("      %s     |  %s        |   %.2f        | %d     \n",prd[i].code,prd[i].nom,prd[i].prix,prd[i].quantity);
     
     }
-  }
+}
 
 
-void ajoutProd(int prodNum){  //ajouter produit
+// --------------------------------------------------------------------ajouter produit------------------------------------------------------------------------------//
+
+void ajoutProd(int prodNum){  
 //  	system("cls");
 	int i;
 	for(i=0;i<prodNum;i++){
@@ -146,8 +174,137 @@ void ajoutProd(int prodNum){  //ajouter produit
 		count++;
 	}
 }
+//------------------------------------------------------------------acheterPrd-------------------------------------------------------------------------------------//
 
+
+void acheterPrd(){
+//    system("cls");
+    printf("================== sell a new product =================\n");
+    int i ;
+    char Code[20];
+    printf("Enter the code of the product: ");
+    scanf("%s",Code);
+//    printf("%s",prd[i].code);
+    for (i = 0; i < count; i++)
+	{
+        if ( strcmp(prd[i].code,Code) == 0 )
+		{
+                printf("name : %s \t code : %s\t quantity : %d \n", prd[i].nom,prd[i].code ,prd[i].quantity);
+                int nmbQantity = 0;
+                printf("Give the quantity you want to buy: ");
+                scanf("%d", &nmbQantity);
+                if ( nmbQantity <= prd[i].quantity)
+				{
+                    prd[i].quantity -= nmbQantity;    
+				 	printf("name : %s \t code : %s\t quantity : %d \n", prd[i].nom,prd[i].code ,prd[i].quantity);
+				 	break;
+                }else{
+                    printf("Quantity not avalaible\n");
+				}
+		}
+		if (i == count - 1)
+		{
+			if (strcmp(prd[i].code,Code) != 0)
+			{
+				printf("The code you entered doesn't match any product\n");
+				break;
+			}
+		}
+		//if(strcmp(prd[i].code,Code)<0 || strcmp(prd[i].code,Code) > 0){
+           // printf("The code you entered doesn't match any product\n");
+//}
+    }
+    
+}
+
+
+
+// ----------------------------------------------------------------------- search for product-----------------------------------------------------------------//
+
+
+void SearchByCode(){
+    char pro_code[15];
+    int i;
+    printf("Enter the code of the product you want to search for:\t");
+    scanf("%s",pro_code);
+    for(i=0;i<count;i++){
+    	
+        if (strcmp(prd[i].code,pro_code)==0)
+            {
+                // system("cls");
+                printf("exist\n");
+                printf(" Code : %s \tName: %s\t Quantity : %d Price : \t %.2f Dh  PriceTVA : %.2f Dh\n",prd[i].code,prd[i].nom,prd[i].quantity,prd[i].prix,(prd[i].prix+(prd[i].prix*0.15)));
+                return;
+            }
+        }
+        printf("This product doesn't exist'\n");
+}
+
+
+
+void SearchByQuantity(){
+int	prdQuant , i;
+printf("Enter the Quantity of the Product :\t");
+scanf("%d",&prdQuant);
+for(i=0;i<count;i++){
+	if(prd[i].quantity=prdQuant){
+		printf("name :%s\t code :%s\t quantity :%d\t price : %.2f",prd[i].nom,prd[i].code,prd[i].quantity,prd[i].prix);
+		
+	}else{
+		printf("there is no product match");
+	}
+  }
+}
+//----------------------------------------------------------------statusOfTheStock------------------------------------------------------------------------------//
+
+ void stockStatus(){
+     int i;
+     for(i=0;i<count;i++){
+         if(prd[i].quantity<3)
+         printf(" Code : %s \tName: %s\t Quantity : %d Price : \t %.2f Dh \n",prd[i].code,prd[i].nom,prd[i].quantity,prd[i].prix);
+     }
+}
+
+//----------------------------------------------------  supply the stock ---------------------------------------------------------------//
+
+void stockSupply(){
+	    int i;
+         char prdCodeAdd[15];
+         int prdQuantityAdd;
+         printf("enter the code of the product :\t");
+         scanf("%s",prdCodeAdd);
+         
+         for(i=0;i<count;i++){
+         	
+             if (strcmp(prd[i].code,prdCodeAdd)==0){
+             	
+                 printf("existe\n");
+                 printf(" Code : %s \tName: %s\t Quantity : %d Price : \t %.2f Dh \n",prd[i].code,prd[i].nom,prd[i].quantity,prd[i].prix);
+                 printf("enter the quantity of the product:\t");
+                 scanf("%d",&prdQuantityAdd);
+                 
+                 prd[i].quantity += prdQuantityAdd;
+             }
+         }
+          printf("the product doesn't exist\n");
+ }
+ 
+ //-----------------------------------------------------------delet a product -----------------------------------------------//
+// void deletProd(){
+// 	char prdCode[20];
+// 	printf("enter the code of the product :\t");
+// 	scanf("%s",&prdCode);
+// 	for(i=prdCode[i];i<count;i++){
+// 		if(strcmp(prd[i].code,prdCode)==0){
+// 			
+//		 }
+//	 }
+// }
+ 
+ 
 int main(int argc, char *argv[]) {
 	menu();
 	return 0;
 }
+
+
